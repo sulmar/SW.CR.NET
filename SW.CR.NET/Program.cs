@@ -11,8 +11,80 @@ namespace SW.CR.NET.ConsoleClient
     {
         static void Main(string[] args)
         {
+            LoadReportWithParameterTest();
+
             LoadReportTest();
 
+        }
+
+        private static void LoadReportForPeriodTest()
+        {
+            var jednostkaId = 1;
+            var osobaId = 1;
+            var dataOd = DateTime.Parse("2016-01-01");
+            var dataDo = DateTime.Parse("2017-12-01");
+
+            var rpt = new ReportDocument();
+
+            rpt.Load(@"Reports\ReportForPeriod.rpt");
+
+            if (rpt.IsLoaded)
+            {
+                // Logowanie do bazy danych
+                // rpt.SetDatabaseLogon("user", "password");
+
+                // Przekazanie parametru
+                rpt.SetParameterValue("Jednostka", jednostkaId);
+                rpt.SetParameterValue("Osoba", osobaId);
+                rpt.SetParameterValue("DataOd", dataOd);
+                rpt.SetParameterValue("DataDo", dataDo);
+
+                if (rpt.HasSavedData)
+                {
+                    rpt.Refresh();
+                }
+
+                rpt.ExportToDisk(CrystalDecisions.Shared.ExportFormatType.PortableDocFormat, "ReportForPeriod.pdf");
+            }
+
+            rpt.Close();
+
+            rpt.Dispose();
+
+            System.Diagnostics.Process.Start("ReportForPeriod.pdf");
+        }
+
+        private static void LoadReportWithParameterTest()
+        {
+            var jednostkaId = 3;
+            var osobaId = 1;
+
+            var rpt = new ReportDocument();
+
+            rpt.Load(@"Reports\ReportWithParameter.rpt");
+
+            if (rpt.IsLoaded)
+            {
+                // Logowanie do bazy danych
+                // rpt.SetDatabaseLogon("user", "password");
+
+                // Przekazanie parametru
+                rpt.SetParameterValue("Jednostka", jednostkaId);
+                rpt.SetParameterValue("Osoba", osobaId);
+
+                if (rpt.HasSavedData)
+                {
+                    rpt.Refresh();
+                }
+
+                rpt.ExportToDisk(CrystalDecisions.Shared.ExportFormatType.PortableDocFormat, "ReportWithParameter.pdf");
+            }
+
+            rpt.Close();
+
+            rpt.Dispose();
+
+            System.Diagnostics.Process.Start("ReportWithParameter.pdf");
         }
 
         private static void LoadReportTest()
@@ -25,6 +97,12 @@ namespace SW.CR.NET.ConsoleClient
 
             if (rpt.IsLoaded)
             {
+
+                if (rpt.HasSavedData)
+                {
+                    rpt.Refresh();
+                }
+
                 Console.WriteLine("Report was loaded.");
 
                 rpt.ExportToDisk(CrystalDecisions.Shared.ExportFormatType.PortableDocFormat, "SimpleReport.pdf");
