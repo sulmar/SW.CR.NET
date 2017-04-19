@@ -12,6 +12,13 @@ namespace SW.CR.NET.ConsoleClient
     {
         static void Main(string[] args)
         {
+            ExportToPdfTest();
+
+
+            PrintTest();
+
+            SetSelectionFormulaTest();
+
             SetLocationTest();
 
             GetParametersTest();
@@ -23,6 +30,45 @@ namespace SW.CR.NET.ConsoleClient
             LoadReportWithParameterTest();
 
             LoadReportTest();
+
+        }
+
+        private static void ExportToPdfTest()
+        {
+            var rpt = new ReportDocument();
+
+            rpt.Load(@"Reports\SimpleReport.rpt");
+
+            var areas = rpt.ReportDefinition.Areas;
+        }
+
+        private static void PrintTest()
+        {
+            var rpt = new ReportDocument();
+
+            rpt.Load(@"Reports\SimpleReport.rpt");
+
+            // Wydruk wszystkich stron
+       
+            rpt.PrintToPrinter(1, true, 0, 0);
+        }
+
+        private static void SetSelectionFormulaTest()
+        {
+            var rpt = new ReportDocument();
+
+            rpt.Load(@"Reports\SimpleReport.rpt");
+
+            rpt.RecordSelectionFormula = "{Orzeczenia.OsobaId} = 3";
+
+            rpt.ExportToDisk(ExportFormatType.PortableDocFormat, "SetSelectionFormula.pdf");
+
+            rpt.Close();
+
+            rpt.Dispose();
+
+            System.Diagnostics.Process.Start("SetSelectionFormula.pdf");
+
 
         }
 
