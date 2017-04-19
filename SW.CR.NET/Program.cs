@@ -12,11 +12,39 @@ namespace SW.CR.NET.ConsoleClient
     {
         static void Main(string[] args)
         {
+            LoadReportParameterMultiTest();
+
             LoadReportForPeriodTest();
 
             LoadReportWithParameterTest();
 
             LoadReportTest();
+
+        }
+
+        private static void LoadReportParameterMultiTest()
+        {
+
+            var rpt = new ReportDocument();
+
+            rpt.Load(@"Reports\ReportWithParameterMulti.rpt");
+
+            var departments = new ParameterValues();
+
+            departments.AddValue(1);
+            departments.AddValue(3);
+            departments.AddValue(4);
+
+
+            rpt.SetParameterValue("Jednostki", departments);
+
+            rpt.ExportToDisk(ExportFormatType.PortableDocFormat, "ReportWithParameterMulti.pdf");
+
+            rpt.Close();
+
+            rpt.Dispose();
+
+            System.Diagnostics.Process.Start("ReportWithParameterMulti.pdf");
 
         }
 
@@ -26,6 +54,8 @@ namespace SW.CR.NET.ConsoleClient
             var osobaId = 1;
             var dataOd = DateTime.Parse("2016-01-01");
             var dataDo = DateTime.Parse("2017-12-01");
+
+            
 
             var period = new ParameterRangeValue
             {
