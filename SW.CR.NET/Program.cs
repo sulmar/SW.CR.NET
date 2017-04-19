@@ -12,6 +12,8 @@ namespace SW.CR.NET.ConsoleClient
     {
         static void Main(string[] args)
         {
+            GetParametersTest();
+
             LoadReportParameterMultiTest();
 
             LoadReportForPeriodTest();
@@ -19,6 +21,33 @@ namespace SW.CR.NET.ConsoleClient
             LoadReportWithParameterTest();
 
             LoadReportTest();
+
+        }
+
+        private static void GetParametersTest()
+        {
+            var rpt = new ReportDocument();
+
+            rpt.Load(@"Reports\ReportForPeriod.rpt");
+
+            // Pobierz wszystkie parametry
+            var parameters = rpt.ParameterFields.Cast<ParameterField>().ToList();
+
+            foreach (var parameter in parameters)
+            {
+                Console.WriteLine($"{parameter.Name} {parameter.PromptText} {parameter.ParameterValueType}");
+            }
+
+
+            // Pobierz tylko używane parametry
+            var parametersUsage = parameters.Where(p => p.ParameterFieldUsage2.HasFlag(ParameterFieldUsage2.InUse));
+
+            foreach (var parameter in parametersUsage)
+            {
+                Console.WriteLine($"{parameter.Name} {parameter.PromptText} {parameter.ParameterValueType}");
+            }
+
+
 
         }
 
@@ -34,6 +63,9 @@ namespace SW.CR.NET.ConsoleClient
             departments.AddValue(1);
             departments.AddValue(3);
             departments.AddValue(4);
+
+            var p1 = new ParameterDiscreteValue { Value = 5 };
+            departments.Add(p1);
 
 
             rpt.SetParameterValue("Jednostki", departments);
