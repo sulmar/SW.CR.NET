@@ -1,4 +1,5 @@
 ﻿using CrystalDecisions.CrystalReports.Engine;
+using CrystalDecisions.Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,8 @@ namespace SW.CR.NET.ConsoleClient
     {
         static void Main(string[] args)
         {
+            LoadReportForPeriodTest();
+
             LoadReportWithParameterTest();
 
             LoadReportTest();
@@ -24,6 +27,12 @@ namespace SW.CR.NET.ConsoleClient
             var dataOd = DateTime.Parse("2016-01-01");
             var dataDo = DateTime.Parse("2017-12-01");
 
+            var period = new ParameterRangeValue
+            {
+                StartValue = dataOd,
+                EndValue = dataDo,
+            };
+
             var rpt = new ReportDocument();
 
             rpt.Load(@"Reports\ReportForPeriod.rpt");
@@ -36,8 +45,10 @@ namespace SW.CR.NET.ConsoleClient
                 // Przekazanie parametru
                 rpt.SetParameterValue("Jednostka", jednostkaId);
                 rpt.SetParameterValue("Osoba", osobaId);
-                rpt.SetParameterValue("DataOd", dataOd);
-                rpt.SetParameterValue("DataDo", dataDo);
+                rpt.SetParameterValue("Okres", period);
+
+                //rpt.SetParameterValue("DataOd", dataOd);
+                //rpt.SetParameterValue("DataDo", dataDo);
 
                 if (rpt.HasSavedData)
                 {
