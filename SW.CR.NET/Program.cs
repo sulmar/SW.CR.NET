@@ -12,6 +12,8 @@ namespace SW.CR.NET.ConsoleClient
     {
         static void Main(string[] args)
         {
+            SetOptionalParameterTest();
+
             ExportToPdfTest();
 
 
@@ -33,13 +35,41 @@ namespace SW.CR.NET.ConsoleClient
 
         }
 
+        // na podst.
+        // https://apps.support.sap.com/sap/support/knowledge/public/en/1893554
+        private static void SetOptionalParameterTest()
+        {
+            int? personId = null;
+
+            var rpt = new ReportDocument();
+
+            rpt.Load(@"Reports\ReportWithOptionalParameter.rpt");
+
+
+            if (personId.HasValue)
+            {
+                rpt.SetParameterValue("OsobaId", personId.Value);
+            }
+            else
+            {
+                var parameter = rpt.ParameterFields["OsobaId"];
+
+                parameter.CurrentValues.Clear();
+                parameter.CurrentValues.IsNoValue = true;
+
+            }
+
+            
+
+            rpt.ExportToDisk(ExportFormatType.PortableDocFormat, "ReportWithOptionalParameter.pdf");
+        }
+
         private static void ExportToPdfTest()
         {
             var rpt = new ReportDocument();
 
             rpt.Load(@"Reports\SimpleReport.rpt");
 
-            var areas = rpt.ReportDefinition.Areas;
         }
 
         private static void PrintTest()
