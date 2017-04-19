@@ -12,6 +12,8 @@ namespace SW.CR.NET.ConsoleClient
     {
         static void Main(string[] args)
         {
+            SetLocationTest();
+
             GetParametersTest();
 
             LoadReportParameterMultiTest();
@@ -22,6 +24,36 @@ namespace SW.CR.NET.ConsoleClient
 
             LoadReportTest();
 
+        }
+
+        private static void SetLocationTest()
+        {
+            var connectionInfo = new ConnectionInfo
+            {
+                ServerName = @"localhost\SQLEXPRESS",
+                DatabaseName = "CrystalReportsDb",
+                IntegratedSecurity = true,
+                //UserID = "myuser",
+                //Password = "mypassword"
+            };
+
+            var rpt = new ReportDocument();
+            rpt.Load(@"Reports\SimpleReport.rpt");
+
+            foreach (Table table in rpt.Database.Tables)
+            {
+                // Zmiana źródła danych
+                TableLogOnInfo logOnInfo = table.LogOnInfo;
+                logOnInfo.ConnectionInfo = connectionInfo;
+
+                table.ApplyLogOnInfo(logOnInfo);
+
+                Console.WriteLine($"{table.Name}");
+            }
+
+            rpt.SaveAs(@"Reports\output.rpt");
+
+            //rpt.ExportToDisk(ExportFormatType.CrystalReport, "SetLocationTest.rpt");
         }
 
         private static void GetParametersTest()
