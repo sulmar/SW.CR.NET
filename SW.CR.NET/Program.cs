@@ -12,6 +12,8 @@ namespace SW.CR.NET.ConsoleClient
     {
         static void Main(string[] args) 
         {
+            GetSqlTest();
+
             LoadReportOptionalParameterTest();
             
             ExportToPdfTest();
@@ -32,6 +34,25 @@ namespace SW.CR.NET.ConsoleClient
             LoadReportWithParameterTest();
 
             LoadReportTest();
+
+        }
+
+        private static void GetSqlTest()
+        {
+            var rpt = new ReportDocument();
+
+            rpt.Load(@"Reports\SimpleReport.rpt");
+
+            var temp = "";
+            var groupPath = new CrystalDecisions.ReportAppServer.DataDefModel.GroupPath();
+
+            var sql = rpt.ReportClientDocument.RowsetController.GetSQLStatement(groupPath, out temp);
+
+            Console.WriteLine(sql);
+
+            rpt.Close();
+
+            rpt.Dispose();
 
         }
 
@@ -78,32 +99,32 @@ namespace SW.CR.NET.ConsoleClient
 
         }
 
-        private static void GetSqlTest()
-        {
+        //private static void GetSqlTest()
+        //{
 
-            // assemblyref://CrystalDecisions.ReportAppServer.DataDefModel
-            // assemblyref://CrystalDecisions.ReportAppServer.ClientDoc
-            // assemblyref://CrystalDecisions.ReportAppServer.Controllers
+        //    // assemblyref://CrystalDecisions.ReportAppServer.DataDefModel
+        //    // assemblyref://CrystalDecisions.ReportAppServer.ClientDoc
+        //    // assemblyref://CrystalDecisions.ReportAppServer.Controllers
 
-            var rpt = new ReportDocument();
+        //    var rpt = new ReportDocument();
 
-            rpt.Load(@"Reports\ReportWithOptionalParameter.rpt");
+        //    rpt.Load(@"Reports\ReportWithOptionalParameter.rpt");
 
-            // Uwaga: przez pobraniem zapytania SQL należy ustawić parametry jeśli są w raporcie
-            rpt.SetParameterValue("OsobaId", 3);
+        //    // Uwaga: przez pobraniem zapytania SQL należy ustawić parametry jeśli są w raporcie
+        //    rpt.SetParameterValue("OsobaId", 3);
 
-            var temp = "";
+        //    var temp = "";
 
-            var boGroupPath = new CrystalDecisions.ReportAppServer.DataDefModel.GroupPath();
+        //    var boGroupPath = new CrystalDecisions.ReportAppServer.DataDefModel.GroupPath();
 
-            var sql = rpt.ReportClientDocument.RowsetController.GetSQLStatement(boGroupPath, out temp);
+        //    var sql = rpt.ReportClientDocument.RowsetController.GetSQLStatement(boGroupPath, out temp);
 
 
-            Console.WriteLine(sql);
+        //    Console.WriteLine(sql);
 
-            rpt.Clone();
-            rpt.Dispose();
-        }
+        //    rpt.Clone();
+        //    rpt.Dispose();
+        //}
 
         private static void ExportToPdfTest()
         {
