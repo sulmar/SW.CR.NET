@@ -39,9 +39,15 @@ namespace SW.CR.NET.ConsoleClient
 
         private static void GetSqlTest()
         {
+            int jednostkaId = 3;
+            int osobaId = 1;
+
             var rpt = new ReportDocument();
 
-            rpt.Load(@"Reports\SimpleReport.rpt");
+            rpt.Load(@"Reports\ReportWithParameter.rpt");
+
+            rpt.SetParameterValue("Jednostka", jednostkaId);
+            rpt.SetParameterValue("Osoba", osobaId);
 
             var temp = "";
             var groupPath = new CrystalDecisions.ReportAppServer.DataDefModel.GroupPath();
