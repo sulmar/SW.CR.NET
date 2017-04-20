@@ -12,6 +12,8 @@ namespace SW.CR.NET.ConsoleClient
     {
         static void Main(string[] args) 
         {
+            ModifyReportTest();
+
             GetSqlTest();
 
             LoadReportOptionalParameterTest();
@@ -37,6 +39,54 @@ namespace SW.CR.NET.ConsoleClient
 
         }
 
+        private static void ModifyReportTest()
+        {
+            var rpt = new ReportDocument();
+            rpt.Load(@"Reports\SimpleReport.rpt");
+
+
+            var rows = rpt.Rows.DataView;
+
+            var section = rpt.ReportDefinition.Sections["DetailSection1"];
+
+            section.Height = 5 * 1440;
+
+            var field = rpt.ReportDefinition.ReportObjects[9];
+
+            var fieldObjects = rpt.ReportDefinition.ReportObjects.OfType<FieldObject>().ToList();
+
+            var root = fieldObjects.First();
+
+            var number = 1;
+
+            foreach (FieldObject fieldObject in fieldObjects)
+            {
+                fieldObject.ObjectFormat.HorizontalAlignment = Alignment.LeftAlign;
+                fieldObject.Left = root.Left;
+                fieldObject.Top = root.Top + 300 * number;
+
+                if (fieldObject.Name=="Status1")
+                {
+                    fieldObject.ObjectFormat.EnableSuppress = true;
+                }
+
+                
+                number++;
+            }
+
+
+            // field.Left += 3 * 1440;
+
+
+
+            //field.Left = root.Left;
+            //field.Top = root.Top + 1440;
+
+            rpt.SaveAs(@"Reports\ModifiedReport.rpt");
+
+            // rpt.ReportDefinition.ReportObjects
+        }
+
         private static void GetSqlTest()
         {
             int jednostkaId = 3;
@@ -53,6 +103,8 @@ namespace SW.CR.NET.ConsoleClient
             var groupPath = new CrystalDecisions.ReportAppServer.DataDefModel.GroupPath();
 
             var sql = rpt.ReportClientDocument.RowsetController.GetSQLStatement(groupPath, out temp);
+
+            
 
             Console.WriteLine(sql);
 
