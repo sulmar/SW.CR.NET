@@ -10,10 +10,10 @@ namespace SW.CR.NET.ConsoleClient
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main(string[] args) 
         {
-            SetOptionalParameterTest();
-
+            LoadReportOptionalParameterTest();
+            
             ExportToPdfTest();
 
 
@@ -37,18 +37,28 @@ namespace SW.CR.NET.ConsoleClient
 
         // na podst.
         // https://apps.support.sap.com/sap/support/knowledge/public/en/1893554
-        private static void SetOptionalParameterTest()
+        private static void LoadReportOptionalParameterTest()
         {
-            int? personId = null;
+            int? osobaId = null;
+
+            Console.WriteLine("Podaj identyfikator osoby");
+
+            var input = Console.ReadLine();
+
+            int id;
+
+            if (int.TryParse(input, out id))
+            {
+                osobaId = id;
+            }
 
             var rpt = new ReportDocument();
 
             rpt.Load(@"Reports\ReportWithOptionalParameter.rpt");
 
-
-            if (personId.HasValue)
+            if (osobaId.HasValue)
             {
-                rpt.SetParameterValue("OsobaId", personId.Value);
+                rpt.SetParameterValue("OsobaId", osobaId);
             }
             else
             {
@@ -56,12 +66,43 @@ namespace SW.CR.NET.ConsoleClient
 
                 parameter.CurrentValues.Clear();
                 parameter.CurrentValues.IsNoValue = true;
-
             }
 
-            
-
             rpt.ExportToDisk(ExportFormatType.PortableDocFormat, "ReportWithOptionalParameter.pdf");
+
+            rpt.Close();
+
+            rpt.Dispose();
+
+            System.Diagnostics.Process.Start("ReportWithOptionalParameter.pdf");
+
+        }
+
+        private static void GetSqlTest()
+        {
+
+            // assemblyref://CrystalDecisions.ReportAppServer.DataDefModel
+            // assemblyref://CrystalDecisions.ReportAppServer.ClientDoc
+            // assemblyref://CrystalDecisions.ReportAppServer.Controllers
+
+            var rpt = new ReportDocument();
+
+            rpt.Load(@"Reports\ReportWithOptionalParameter.rpt");
+
+            // Uwaga: przez pobraniem zapytania SQL należy ustawić parametry jeśli są w raporcie
+            rpt.SetParameterValue("OsobaId", 3);
+
+            var temp = "";
+
+            var boGroupPath = new CrystalDecisions.ReportAppServer.DataDefModel.GroupPath();
+
+            var sql = rpt.ReportClientDocument.RowsetController.GetSQLStatement(boGroupPath, out temp);
+
+
+            Console.WriteLine(sql);
+
+            rpt.Clone();
+            rpt.Dispose();
         }
 
         private static void ExportToPdfTest()
