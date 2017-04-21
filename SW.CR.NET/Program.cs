@@ -13,6 +13,8 @@ namespace SW.CR.NET.ConsoleClient
     {
         static void Main(string[] args) 
         {
+            TransformReportTest();
+
             ModifyReportTest();
 
             //  CreateReportTest();
@@ -175,6 +177,120 @@ namespace SW.CR.NET.ConsoleClient
 
             System.Diagnostics.Process.Start("AddImageReport.pdf");
         }
+
+
+        private static void TransformReportTest()
+        {
+            var rpt = new ReportDocument();
+            rpt.Load(@"Reports\SimpleReport.rpt");
+            var doc = rpt.ReportClientDocument;
+
+            // var fieldObjects = rpt.ReportDefinition.ReportObjects.OfType<FieldObject>().ToList();
+            var fields = doc.ReportDefController.ReportObjectController.GetReportObjectsByKind(CrystalDecisions.ReportAppServer.ReportDefModel.CrReportObjectKindEnum.crReportObjectKindField);
+
+            // var q = doc.ReportDefController.ReportDefinition.DetailArea.Sections.Count;
+
+            var textObject = new CrystalDecisions.ReportAppServer.ReportDefModel.TextObject();
+
+            var sectionStart = doc.ReportDefController.ReportDefinition.DetailArea.Sections[0];
+
+            sectionStart.Format.BackgroundColor = 16;
+
+            var fontColor = new CrystalDecisions.ReportAppServer.ReportDefModel.FontColor();
+            var font = new CrystalDecisions.ReportAppServer.ReportDefModel.Font();
+            font.Bold = true;
+            font.Name = "Arial";
+            fontColor.Font = font;
+            fontColor.Color = 0;
+
+            var header1 = new CrystalDecisions.ReportAppServer.ReportDefModel.FieldHeadingObject();
+            header1.FieldObjectName = "headerPole";
+            header1.FontColor = fontColor;
+
+           //  doc.ReportDefController.ReportObjectController.Add(textObject, sectionStart, -1);
+
+            foreach (CrystalDecisions.ReportAppServer.ReportDefModel.ISCRReportObject fieldObject in fields)
+            {
+                // Utworzenie nowej sekcji
+                CrystalDecisions.ReportAppServer.ReportDefModel.Section newSection = new CrystalDecisions.ReportAppServer.ReportDefModel.Section();
+                newSection.Kind = CrystalDecisions.ReportAppServer.ReportDefModel.CrAreaSectionKindEnum.crAreaSectionKindDetail;
+                newSection.Name = "Detail" + fieldObject.Name;
+                newSection.Height = 300;
+                newSection.Width = 11520;
+
+             //   var area = doc.ReportDefController.ReportDefinition.DetailArea;
+
+                var index = fields.FindIndexOf(fieldObject);
+
+                if (index % 2 == 0)
+                {
+                    newSection.Format.BackgroundColor = 14803425;
+                }
+
+                doc.ReportDefController.ReportSectionController.Add(newSection, doc.ReportDefController.ReportDefinition.DetailArea, -1);
+
+                fieldObject.Format.HorizontalAlignment = CrystalDecisions.ReportAppServer.ReportDefModel.CrAlignmentEnum.crAlignmentLeft;
+                fieldObject.Left = 200;
+                fieldObject.Top = 0;
+                fieldObject.Width = 6 * 1440;
+
+                // Przesuwamy pole
+                doc.ReportDefController.ReportObjectController.Remove(fieldObject);
+                doc.ReportDefController.ReportObjectController.Add(fieldObject, newSection);
+
+                
+            }
+
+            // Utworzenie grupy
+
+            var group = new CrystalDecisions.ReportAppServer.DataDefModel.Group();
+            var tableIndex = doc.DatabaseController.Database.Tables.FindByAlias("Orzeczenia");
+            var table = (CrystalDecisions.ReportAppServer.DataDefModel.Table)doc.DatabaseController.Database.Tables[tableIndex];
+
+            // Pobranie pola z raportu
+            var field = (CrystalDecisions.ReportAppServer.DataDefModel.Field)table.DataFields.FindField("{Orzeczenia.OsobaId}",
+                CrystalDecisions.ReportAppServer.DataDefModel.CrFieldDisplayNameTypeEnum.crFieldDisplayNameFormula,
+                CrystalDecisions.ReportAppServer.DataDefModel.CeLocale.ceLocaleUserDefault);
+
+            // Ustawienie pola do grupowania
+            group.ConditionField = field;
+
+
+            // Dodanie grupy do raportu
+            doc.DataDefController.GroupController.Add(-1, group);
+
+            // Dodanie pola z bazy danych
+            var field2 = new CrystalDecisions.ReportAppServer.ReportDefModel.FieldObject();
+            field2.DataSourceName = "{Orzeczenia.OsobaId}";
+            field2.FieldValueType = CrystalDecisions.ReportAppServer.DataDefModel.CrFieldValueTypeEnum.crFieldValueTypeInt32sField;
+            field2.Left = 4 * 1440; //1440 twips per inch
+            field2.Width = 3 * 1440;
+            field2.FontColor = new CrystalDecisions.ReportAppServer.ReportDefModel.FontColor();
+            field2.FontColor.Font.Name = "Arial";
+            field2.FontColor.Font.Size = 10;
+            field2.Format.HorizontalAlignment = CrystalDecisions.ReportAppServer.ReportDefModel.CrAlignmentEnum.crAlignmentLeft;
+
+         //   var sectionStart = doc.ReportDefController.ReportDefinition.DetailArea.Sections[0];
+
+             var groupSection = doc.ReportDefController.ReportDefinition.GroupHeaderArea[0].Sections[0];
+
+            //Add the object to the report
+            doc.ReportDefController.ReportObjectController.Add(field2, groupSection, -1);
+
+
+
+            rpt.SaveAs(@"Reports\TransformReport.rpt");
+
+            rpt.ExportToDisk(ExportFormatType.PortableDocFormat, "TransformReport.pdf");
+
+            rpt.Close();
+
+            rpt.Dispose();
+
+            System.Diagnostics.Process.Start("TransformReport.pdf");
+
+        }
+
 
         private static void ModifyReportTest()
         {
