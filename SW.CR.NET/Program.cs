@@ -254,6 +254,27 @@ namespace SW.CR.NET.ConsoleClient
                doc.ReportDefController.ReportObjectController.Add(item, sectionStart);
             }
 
+            // Utworzenie nowej formuły
+            var formula = new CrystalDecisions.ReportAppServer.DataDefModel.FormulaField();
+            formula.Text = "if recordnumber mod 2 = 0 then Color(225, 225, 225) else crWhite";
+            formula.Name = "Color";
+            formula.Syntax = CrystalDecisions.ReportAppServer.DataDefModel.CrFormulaSyntaxEnum.crFormulaSyntaxCrystal;
+            formula.Type = CrystalDecisions.ReportAppServer.DataDefModel.CrFieldValueTypeEnum.crFieldValueTypeSameAsInputField;
+
+            // Utworzenie formuły warunkowej 
+            var conditionFormula = new CrystalDecisions.ReportAppServer.ReportDefModel.ConditionFormula();
+            conditionFormula.Text = "if recordnumber mod 2 = 0 then crRed else crWhite";
+            conditionFormula.Syntax = CrystalDecisions.ReportAppServer.DataDefModel.CrFormulaSyntaxEnum.crFormulaSyntaxCrystal;
+
+            doc.DataDefController.FormulaFieldController.Add(formula);
+
+            var myenum = CrystalDecisions.ReportAppServer.ReportDefModel.CrSectionAreaFormatConditionFormulaTypeEnum.crSectionAreaConditionFormulaTypeBackgroundColor;
+
+            sectionStart.Format.ConditionFormulas[myenum] = conditionFormula;
+
+            // var formulaTypeBackgroundColor = sectionStart.Format.ConditionFormulas[myenum];
+
+
             // Utworzenie nowej sekcji
             CrystalDecisions.ReportAppServer.ReportDefModel.Section newSection = new CrystalDecisions.ReportAppServer.ReportDefModel.Section();
             newSection.Kind = CrystalDecisions.ReportAppServer.ReportDefModel.CrAreaSectionKindEnum.crAreaSectionKindDetail;
