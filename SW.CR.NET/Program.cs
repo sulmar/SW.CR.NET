@@ -6,12 +6,23 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace SW.CR.NET.ConsoleClient
 {
     class Program
     {
         static void Main(string[] args) 
         {
+            AddTextObjectTest();
+
+            AddImageToReportTest();
+
+            // OptionsTest();
+
+            
+
+           
+
             ModifyReportTest();
 
             GetSqlTest();
@@ -39,11 +50,110 @@ namespace SW.CR.NET.ConsoleClient
 
         }
 
-        private static void ModifyReportTest()
+        private static void OptionsTest()
         {
             var rpt = new ReportDocument();
             rpt.Load(@"Reports\SimpleReport.rpt");
 
+
+            var doc = rpt.ReportClientDocument;
+
+            var options = doc.ReportOptions;
+
+            options.EnableSaveDataWithReport = true;
+
+            doc.SaveAs("OptionsReport.rpt", @"c:\temp\");
+
+        }
+
+        private static void AddTextObjectTest()
+        {
+            var rpt = new ReportDocument();
+            rpt.Load(@"Reports\SimpleReport.rpt");
+
+            //access the ReportClientDocument in the ReportDocument (EROM bridge)
+            var doc = rpt.ReportClientDocument;
+
+            //first determine which area and section to add the text field to - in this case the ReportHeaderArea first's section
+            var section = doc.ReportDefController.ReportDefinition.ReportHeaderArea.Sections[0];
+
+            //create the textobject
+            var textObject = new CrystalDecisions.ReportAppServer.ReportDefModel.TextObject();
+
+            //create the paragraph elements for the textobject 
+            var paragraphs = new CrystalDecisions.ReportAppServer.ReportDefModel.Paragraphs();
+            var paragraph = new CrystalDecisions.ReportAppServer.ReportDefModel.Paragraph();
+            var paragraphElements = new CrystalDecisions.ReportAppServer.ReportDefModel.ParagraphElements();
+            var paragraphTextElement = new CrystalDecisions.ReportAppServer.ReportDefModel.ParagraphTextElement();
+
+            //set the text value for the text field
+            paragraphTextElement.Text = "This is the added text field in the reportheader";
+            paragraphTextElement.Kind = CrystalDecisions.ReportAppServer.ReportDefModel.CrParagraphElementKindEnum.crParagraphElementKindText;
+
+            //fix some wierd defaults and behavior by explicitly setting default font
+            var fontColor = new CrystalDecisions.ReportAppServer.ReportDefModel.FontColor();
+            var font = new CrystalDecisions.ReportAppServer.ReportDefModel.Font();
+            font.Bold = true;
+            font.Name = "Arial";
+            fontColor.Font = font;
+            paragraphTextElement.FontColor = fontColor;
+
+            paragraphElements.Add(paragraphTextElement);
+            paragraph.ParagraphElements = paragraphElements;
+            paragraphs.Add(paragraph);
+            textObject.Paragraphs = paragraphs;
+
+            //now add it to the section
+            textObject.Left = 2000;
+            textObject.Top = 1;
+            textObject.Width = 5000;
+            textObject.Height = 226;
+
+            doc.ReportDefController.ReportObjectController.Add(textObject, section);
+
+            rpt.SaveAs(@"Reports\AddTextObjectReport.rpt");
+
+            rpt.ExportToDisk(ExportFormatType.PortableDocFormat, "AddTextObjectReport.pdf");
+
+            rpt.Close();
+
+            rpt.Dispose();
+
+            System.Diagnostics.Process.Start("AddTextObjectReport.pdf");
+
+        }
+
+        private static void AddImageToReportTest()
+        {
+            var rpt = new ReportDocument();
+
+            var path = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
+
+            var filename = path + @"\Images\sulmar.png";
+
+            rpt.Load(@"Reports\SimpleReport.rpt");
+
+            var doc = rpt.ReportClientDocument;
+
+            var section = doc.ReportDefController.ReportDefinition.ReportHeaderArea.Sections[0];
+
+            var picture = doc.ReportDefController.ReportObjectController.ImportPicture(filename, section, 1, 1);
+
+            rpt.SaveAs(@"Reports\AddImageReport.rpt");
+
+            rpt.ExportToDisk(ExportFormatType.PortableDocFormat, "AddImageReport.pdf");
+
+            rpt.Close();
+
+            rpt.Dispose();
+
+            System.Diagnostics.Process.Start("AddImageReport.pdf");
+        }
+
+        private static void ModifyReportTest()
+        {
+            var rpt = new ReportDocument();
+            rpt.Load(@"Reports\SimpleReport.rpt");
 
             var rows = rpt.Rows.DataView;
 
