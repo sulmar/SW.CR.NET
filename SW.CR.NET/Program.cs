@@ -13,17 +13,17 @@ namespace SW.CR.NET.ConsoleClient
     {
         static void Main(string[] args) 
         {
+            ModifyReportTest();
+
+            //  CreateReportTest();
+
             AddTextObjectTest();
 
             AddImageToReportTest();
 
             // OptionsTest();
 
-            
-
            
-
-            ModifyReportTest();
 
             GetSqlTest();
 
@@ -49,6 +49,32 @@ namespace SW.CR.NET.ConsoleClient
             LoadReportTest();
 
         }
+
+        //private static void CreateReportTest()
+        //{
+        //    var doc = new CrystalDecisions.ReportAppServer.ClientDoc.ReportClientDocument();
+        //    doc.ReportAppServer = "localhost";
+        //    doc.New();
+
+
+        //    var path = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
+
+        //    var filename = path + @"\Images\sulmar.png";
+
+
+        //    var section = doc.ReportDefController.ReportDefinition.ReportHeaderArea.Sections[0];
+
+        //    var picture = doc.ReportDefController.ReportObjectController.ImportPicture(filename, section, 1, 1);
+
+        //    //rpt.ExportToDisk(ExportFormatType.PortableDocFormat, "CreateReport.pdf");
+
+        //    //rpt.Close();
+
+        //    //rpt.Dispose();
+
+        //    System.Diagnostics.Process.Start("CreateReport.pdf");
+
+        //}
 
         private static void OptionsTest()
         {
@@ -155,46 +181,101 @@ namespace SW.CR.NET.ConsoleClient
             var rpt = new ReportDocument();
             rpt.Load(@"Reports\SimpleReport.rpt");
 
-            var rows = rpt.Rows.DataView;
-
             var section = rpt.ReportDefinition.Sections["DetailSection1"];
-
-            section.Height = 5 * 1440;
-
-            var field = rpt.ReportDefinition.ReportObjects[9];
+            
+            section.Height = 3 * 1440;
 
             var fieldObjects = rpt.ReportDefinition.ReportObjects.OfType<FieldObject>().ToList();
 
-            var root = fieldObjects.First();
-
-            var number = 1;
+            var number = 0;
 
             foreach (FieldObject fieldObject in fieldObjects)
             {
                 fieldObject.ObjectFormat.HorizontalAlignment = Alignment.LeftAlign;
-                fieldObject.Left = root.Left;
-                fieldObject.Top = root.Top + 300 * number;
+                fieldObject.Left = 1 * 1440 + 200;
+                fieldObject.Top = 300 * number;
+                fieldObject.Width = 6 * 1440;
 
-                if (fieldObject.Name=="Status1")
+                if (fieldObject.Name == "Status1")
                 {
                     fieldObject.ObjectFormat.EnableSuppress = true;
                 }
 
-                
                 number++;
             }
 
+            var fieldHeadingObjects = rpt.ReportDefinition.ReportObjects.OfType<FieldHeadingObject>().ToList();
 
-            // field.Left += 3 * 1440;
+            number = 0;
+
+            foreach (FieldHeadingObject header in fieldHeadingObjects)
+            {
+                header.ObjectFormat.HorizontalAlignment = Alignment.LeftAlign;
+                header.Left = 0;
+                header.Top = 300 * number;
+                header.Width = 1 * 1440;
+
+                //if (header.Name == "Status1")
+                //{
+                //    fieldObject.ObjectFormat.EnableSuppress = true;
+                //}
+
+                number++;
+            }
+
+           
+           
+            var doc = rpt.ReportClientDocument;
+
+            var sectionStart = doc.ReportDefController.ReportDefinition.DetailArea.Sections[0];
+            var sectionEnd = doc.ReportDefController.ReportDefinition.DetailArea.Sections[0];
+
+            CrystalDecisions.ReportAppServer.ReportDefModel.BoxObject boxObject = new CrystalDecisions.ReportAppServer.ReportDefModel.BoxObject();
+            boxObject.Left = 10;
+            boxObject.Right = 7 * 1440;
+            boxObject.Top = 1440;
+            boxObject.LineColor = 16;
+            // boxObject.FillColor = 16;
+            boxObject.LineThickness = 15;
+            boxObject.LineStyle = CrystalDecisions.ReportAppServer.ReportDefModel.CrLineStyleEnum.crLineStyleSingle;
+            boxObject.SectionName = sectionStart.Name;
+            boxObject.EndSectionName = sectionEnd.Name;
+
+            boxObject.EnableExtendToBottomOfSection = true;
+            boxObject.SectionCode = sectionStart.SectionCode;
+
+            doc.ReportDefController.ReportObjectController.Add(boxObject, sectionStart, 0);
+
+            var headers = doc.ReportDefController.ReportObjectController.GetReportObjectsByKind(CrystalDecisions.ReportAppServer.ReportDefModel.CrReportObjectKindEnum.crReportObjectKindFieldHeading);
+
+            foreach (CrystalDecisions.ReportAppServer.ReportDefModel.ISCRReportObject item in headers)
+            {
+               doc.ReportDefController.ReportObjectController.Remove(item);
+               doc.ReportDefController.ReportObjectController.Add(item, sectionStart);
+            }
+
+            // Utworzenie nowej sekcji
+            CrystalDecisions.ReportAppServer.ReportDefModel.Section newSection = new CrystalDecisions.ReportAppServer.ReportDefModel.Section();
+            newSection.Kind = CrystalDecisions.ReportAppServer.ReportDefModel.CrAreaSectionKindEnum.crAreaSectionKindDetail;
+            newSection.Name = "Detail2";
+            newSection.Height = 200;
+            newSection.Width = 11520;
+
+            var area = doc.ReportDefController.ReportDefinition.DetailArea;
+
+            doc.ReportDefController.ReportSectionController.Add(newSection, area, -1);
 
 
+           rpt.SaveAs(@"Reports\ModifiedReport.rpt");
 
-            //field.Left = root.Left;
-            //field.Top = root.Top + 1440;
+            rpt.ExportToDisk(ExportFormatType.PortableDocFormat, "ModifiedReport.pdf");
 
-            rpt.SaveAs(@"Reports\ModifiedReport.rpt");
+            rpt.Close();
 
-            // rpt.ReportDefinition.ReportObjects
+            rpt.Dispose();
+
+            System.Diagnostics.Process.Start("ModifiedReport.pdf");
+
         }
 
         private static void GetSqlTest()
